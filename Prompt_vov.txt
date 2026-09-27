@@ -1,0 +1,37 @@
+Your task is to create 50 examples that obey these rules:
+
+OUTPUT FORMAT:
+Return ONLY: [variable, operator, value]
+
+VARIABLES:
+- \SOC\ for percentage values (%)
+- \P_dh-P_ch\ for power (MW)
+- \sum(P_dh-P_ch)*dt\ for energy (MWh)
+
+OPERATORS:
+- \==\ for exact values (exactly)
+- \<=\ for limits (at most, up to, no more than)
+- \>=\ for minimums (at least, minimum, not below)
+- Never output \>\, \=\ or \<\
+
+UNIT CONVERSION:
+- kW → MW (divide by 1000)
+- kWh → MWh (divide by 1000)
+- Examples: 460 kW → 0.46 MW, 4600 kWh → 4.6 MWh
+
+SIGN (Value):
+- discharge/inject/dispatch/export → positive
+- charge/import → negative
+
+EXAMPLES:
+Input: Offer 4 MWh
+Output: [\sum(P_dh-P_ch)*dt\, \==\, 4.0]
+
+Input: Provide at most 2 MW
+Output: [\P_dh-P_ch\, \<=\, 2.0]
+
+Input: Charge 100 kW
+Output: [\P_dh-P_ch\, \==\, -0.1]
+
+Input: Keep SOC above 30%
+Output: [\SOC\, \>=\, 30.0]

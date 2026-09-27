@@ -1,0 +1,62 @@
+Your task is to create 50 examples that obey these rules:
+
+OUTPUT FORMAT:
+Always return a list exactly in this structure:
+['day_label1', 'HH:00', 'day_label2', 'HH:00']
+Where day_label is either 'today' or 'tomorrow'.
+Use 24-hour format with leading zeros (06:00, 14:00, 24:00).
+Output ONLY the list. No explanation, no extra text.
+
+ANCHOR TIME:
+You will always be given the current time in the input (e.g. 'Current time: 14:00'). 
+Use this as the anchor to decide 'today' vs 'tomorrow'.
+
+GENERAL RULES:
+1. If a time or period has already completely passed relative to the anchor time, shift it to 'tomorrow'.
+2. If the time/period is in the future or currently ongoing, use 'today' and start from the later of (anchor time, period start).
+3. If the user explicitly says 'tomorrow', always use 'tomorrow' regardless of anchor time.
+4. For durations ('for the next N hours', 'for 3 hours', etc.): start at the anchor time and add the duration.
+5. For point-in-time references ('at 6 pm', 'at 14:00'): the slot is 1 hour long (start = reference, end = start + 1 hour).
+6. 'now' or 'starting now' → start at anchor time.
+7. 'end of day', 'midnight' → today 24:00 (or tomorrow 24:00 if anchor time is after ~23:00 and context implies next midnight).
+
+NAMED PERIODS (use these fixed windows):
+- dawn:  00:00 - 06:00
+- morning:   06:00 - 12:00
+- afternoon: 12:00 - 18:00
+- evening:   18:00 - 24:00
+- day:   06:00 - 18:00
+- night: 18:00 today - 06:00 tomorrow
+- today: anchor time → 24:00 today
+
+SHIFT LOGIC (most important):
+- If the entire named period has passed (anchor > period end), shift the whole period to tomorrow.
+  Example: Current time 14:00 + 'morning' → ['tomorrow', '06:00', 'tomorrow', '12:00']
+- If the period is ongoing (anchor is inside the period), start from anchor time until period end.
+  Example: Current time 09:00 + 'morning' → ['today', '09:00', 'today', '12:00']
+- If the period is entirely in the future, use the full period on today.
+
+EXAMPLES:
+Input: 'Inject 0.3 MW from 10:00 to 13:00 Current time: 08:00'
+Output: ['today', '10:00', 'today', '13:00']
+
+Input: 'Keep SOC above 30% until midnight Current time: 18:00'
+Output: ['today', '18:00', 'today', '24:00']
+
+Input: 'Deliver 1.5 MWh tomorrow morning Current time: 14:00'
+Output: ['tomorrow', '06:00', 'tomorrow', '12:00']
+
+Input: 'Offer 300 kWh for the next five hours Current time: 10:00'
+Output: ['today', '10:00', 'today', '15:00']
+
+Input: 'Charge 200 kW during the morning Current time: 02:00'
+Output: ['today', '06:00', 'today', '12:00']
+
+Input: 'Charge during the morning Current time: 09:30'
+Output: ['today', '09:30', 'today', '12:00']
+
+Input: 'SOC above 60% at 6 pm Current time: 15:00'
+Output: ['today', '18:00', 'today', '19:00']
+
+Input: 'Charge this afternoon Current time: 14:00'
+Output: ['today', '14:00', 'today', '18:00']

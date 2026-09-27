@@ -1,0 +1,59 @@
+Your task is to create 50 examples that obey these rules:
+
+OUTPUT FORMAT:
+Return ONLY a valid Python list literal parsable by ast.literal_eval().
+
+DEFINITION:
+A constraint is a single, atomic requirement involving exactly ONE quantity type:
+- Energy (MWh or kWh)
+- Power (MW or kW)
+- State of Charge (SOC, %)
+
+STRICT RULES:
+
+1. ATOMICITY:
+- Each constraint must contain exactly ONE quantity type.
+- If a sentence contains multiple quantities or conditions, split them into separate constraints.
+
+2. TEMPORAL REQUIREMENT:
+- Every constraint MUST include a temporal reference.
+- If the original sentence provides a temporal reference, propagate that temporal scope to all atomic constraints derived from it.
+- Keep the temporal scope consistent across constraints that share the same origin.
+- Never drop temporal information (start time, end time, duration, 'starting at', etc.).
+
+3. BOUNDED INTERVAL DECOMPOSITION (STRICT):
+- If the input contains a bounded interval (e.g., 'between X and Y', 'from X to Y', 'X–Y', 'within X and Y'), this MUST output TWO constraints:
+  • One lower bound: 'at least X%'
+  • One upper bound: 'at most Y%'
+- A constraint MUST NOT contain bounded interval expressions.
+- Missing one side of the bounded interval = INVALID.
+
+4. TEMPORAL SCOPE PROPAGATION:
+- If multiple constraints share the same temporal scope, assign that time to all of them.
+- If constraints have distinct temporal scopes, preserve each separately.
+- Do NOT convert fuzzy temporal terms (e.g., 'morning', 'afternoon', 'overnight') into clock times.
+- Preserve the user's original temporal language.
+
+5. VALIDITY CHECK (MANDATORY):
+Each constraint is INVALID if:
+- It contains more than one quantity type
+- It contains a bounded interval expression
+- It is missing a temporal reference
+- It changes the original meaning
+
+EXAMPLES:
+
+Input: 'Keep SOC between 30% and 80% until 18:00'
+Output: ['Keep SOC at least 30% until 18:00', 'Keep SOC at most 80% until 18:00']
+
+Input: 'Provide 1 MW and maintain SOC above 40% for the next 2 hours'
+Output: ['Provide 1 MW for the next 2 hours', 'Maintain SOC above 40% for the next 2 hours']
+
+Input: 'From 10:00 to 12:00, charge 200 kW and keep SOC between 25% and 75%'
+Output: ['Charge 200 kW from 10:00 to 12:00', 'Keep SOC at least 25% from 10:00 to 12:00', 'Keep SOC at most 75% from 10:00 to 12:00']
+
+Input: 'Export 1 MWh during the day and 0.5 MW at night'
+Output: ['Export 1 MWh during the day', 'Export 0.5 MW at night']
+
+Input: 'Keep SOC at least 45% and export 300 kW for the next three hours'
+Output: ['Keep SOC at least 45% for the next three hours', 'Export 300 kW for the next three hours']
